@@ -12,7 +12,7 @@ import ReactNoopUpdateQueue from './ReactNoopUpdateQueue';
 
 // 该文件包含两个基本组件，分别为 Component 及 PureComponent
 // 没看这个文件之前以为 Component 会很复杂，内部需要处理一大堆逻辑
-// 其他简单的一匹
+// 其实简单的一匹
 
 const emptyObject = {};
 if (__DEV__) {
@@ -26,6 +26,12 @@ function Component(props, context, updater) {
   this.props = props;
   this.context = context;
   // If a component has string refs, we will assign a different object later.
+  // ref 有好几个方式创建，字符串的不讲了，一般都是通过传入一个函数来给一个变量赋值 ref 的
+  // ref={el => this.el = el} 这种方式最推荐
+  // 当然还有种方式是通过 React.createRef 创建一个 ref 变量，然后这样使用
+  // this.el = React.createRef()
+  // ref={this.el}
+  // 关于 React.createRef 就阅读 ReactCreateRef.js 文件了
   this.refs = emptyObject;
   // We initialize the default updater but the real one gets injected by the
   // renderer.
