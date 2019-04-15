@@ -16,6 +16,7 @@ import warningWithoutStack from 'shared/warningWithoutStack';
 export default function forwardRef<Props, ElementType: React$ElementType>(
   render: (props: Props, ref: React$Ref<ElementType>) => React$Node,
 ) {
+
   if (__DEV__) {
     if (render != null && render.$$typeof === REACT_MEMO_TYPE) {
       warningWithoutStack(
