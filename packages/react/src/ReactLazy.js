@@ -10,6 +10,7 @@ import type {LazyComponent, Thenable} from 'shared/ReactLazyComponent';
 import {REACT_LAZY_TYPE} from 'shared/ReactSymbols';
 import warning from 'shared/warning';
 
+// 返回一个异步加载的组件，Thenable 就代表一个 Promise 对象
 export function lazy<T, R>(ctor: () => Thenable<T, R>): LazyComponent<T> {
   let lazyType = {
     $$typeof: REACT_LAZY_TYPE,
