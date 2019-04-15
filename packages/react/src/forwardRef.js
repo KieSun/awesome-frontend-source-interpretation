@@ -9,6 +9,10 @@ import {REACT_FORWARD_REF_TYPE, REACT_MEMO_TYPE} from 'shared/ReactSymbols';
 
 import warningWithoutStack from 'shared/warningWithoutStack';
 
+// 这个 API 我也没有用过，具体文档看这里 https://reactjs.org/docs/forwarding-refs.html
+// 总结来说就是能把 ref 传递到函数组件上
+// 其实没有这个 API 之前，你也可以通过 props 的方式传递 ref
+// 这个实现没啥好说的，就是让 render 函数多了 ref 这个参数
 export default function forwardRef<Props, ElementType: React$ElementType>(
   render: (props: Props, ref: React$Ref<ElementType>) => React$Node,
 ) {

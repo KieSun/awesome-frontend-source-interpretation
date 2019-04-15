@@ -11,6 +11,9 @@ import {REACT_ELEMENT_TYPE} from 'shared/ReactSymbols';
 
 import ReactCurrentOwner from './ReactCurrentOwner';
 
+// 这个文件直接从 ReactElement 开始看起
+// 上面的这些代码没啥阅读意义
+
 const hasOwnProperty = Object.prototype.hasOwnProperty;
 
 const RESERVED_PROPS = {
