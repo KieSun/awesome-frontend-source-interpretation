@@ -28,6 +28,7 @@ const SUBSEPARATOR = ':';
 
 // 这个文件我们只关注 mapChildren 这个函数，因为这个函数内部的实现基本就贯穿了整个文件了
 // 当然你想全看了当然也是可以滴，但是我一般来说不会选择全看，毕竟我只想了解代码的核心意图
+// 如果你真的想全看完代码的话，推荐看完 mapChildren 的流程以后再去阅读
 // 另外如果你不了解这个 API 干嘛用的，可以阅读文档 https://reactjs.org/docs/react-api.html#reactchildren
 // 接下来我们就直接定位到 mapChildren 函数，开始阅读吧
 
