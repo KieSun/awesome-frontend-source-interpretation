@@ -23,6 +23,7 @@ const SUBSEPARATOR = ':';
 // React.Children 这个 API 我只在写组件的时候用过
 // 一般会用在组合组件设计模式上
 // 如果你不清楚啥是组合组件的话，可以看下 Ant-design，内部大量使用了这种设计模式
+// https://react-cn.github.io/react/docs/multiple-components.html 这里也有文档可以阅读
 // 比如说 Radio.Group、Radio.Button
 
 // 这个文件我们只关注 mapChildren 这个函数，因为这个函数内部的实现基本就贯穿了整个文件了
