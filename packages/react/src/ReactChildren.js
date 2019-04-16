@@ -19,6 +19,16 @@ import ReactDebugCurrentFrame from './ReactDebugCurrentFrame';
 const SEPARATOR = '.';
 const SUBSEPARATOR = ':';
 
+// 这个代码算是 React 这个文件夹下有点东西的东西
+// React.Children 这个 API 我只在写组件的时候用过
+// 一般会用在组合组件设计模式上
+// 如何你不清楚啥是组合组件的话，可以看下 Ant-design，内部大量使用了这种设计模式
+// 比如说 Radio.Group、Radio.Button
+
+// 这个文件我们只关注 mapChildren 这个函数，因为这个函数内部的实现基本就贯穿了整个文件了
+// 如果你不了解这个 API 干嘛用的，可以阅读文档 https://reactjs.org/docs/react-api.html#reactchildren
+// 接下来我们就直接定位到 mapChildren 函数，开始阅读吧
+
 /**
  * Escape and wrap key so it is safe to use as a reactid
  *
@@ -102,6 +112,7 @@ function traverseAllChildrenImpl(
   callback,
   traverseContext,
 ) {
+  // 开始判断 children 的类型
   const type = typeof children;
 
   if (type === 'undefined' || type === 'boolean') {
@@ -127,7 +138,9 @@ function traverseAllChildrenImpl(
         }
     }
   }
-
+  // 如果 children 是可以渲染的节点的话，就直接调用 callback
+  // callback 是 mapSingleChildIntoContext
+  // 我们先去阅读下 mapSingleChildIntoContext 函数的源码
   if (invokeCallback) {
     callback(
       traverseContext,
@@ -285,10 +298,20 @@ function forEachChildren(children, forEachFunc, forEachContext) {
   releaseTraverseContext(traverseContext);
 }
 
+/**
+ *
+ * @param bookKeeping 就是我们从对象池子里取出来的东西
+ * @param child 传入的节点
+ * @param childKey 节点的 key
+ */
 function mapSingleChildIntoContext(bookKeeping, child, childKey) {
   const {result, keyPrefix, func, context} = bookKeeping;
-
+  // func 就是我们在 React.Children.map(this.props.children, c => c)
+  // 中传入的第二个函数参数
   let mappedChild = func.call(context, child, bookKeeping.count++);
+  // 判断函数返回值是否为数组
+  // 因为可能会出现这种情况
+  // React.Children.map(this.props.children, c => [c, c])
   if (Array.isArray(mappedChild)) {
     mapIntoWithKeyPrefixInternal(mappedChild, result, childKey, c => c);
   } else if (mappedChild != null) {
@@ -313,6 +336,10 @@ function mapIntoWithKeyPrefixInternal(children, array, prefix, func, context) {
   if (prefix != null) {
     escapedPrefix = escapeUserProvidedKey(prefix) + '/';
   }
+  // getPooledTraverseContext 和 releaseTraverseContext 是配套的函数
+  // 用处其实很简单，就是维护一个大小为 10 的对象重用池
+  // 每次从这个池子里取一个对象去赋值，用完了就将对象上的属性置空然后丢回池子
+  // 维护这个池子的用意就是提高性能，毕竟频繁创建销毁一个有很多属性的对象消耗性能
   const traverseContext = getPooledTraverseContext(
     array,
     escapedPrefix,
