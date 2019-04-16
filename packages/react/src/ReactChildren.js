@@ -22,11 +22,12 @@ const SUBSEPARATOR = ':';
 // 这个代码算是 React 这个文件夹下有点东西的东西
 // React.Children 这个 API 我只在写组件的时候用过
 // 一般会用在组合组件设计模式上
-// 如何你不清楚啥是组合组件的话，可以看下 Ant-design，内部大量使用了这种设计模式
+// 如果你不清楚啥是组合组件的话，可以看下 Ant-design，内部大量使用了这种设计模式
 // 比如说 Radio.Group、Radio.Button
 
 // 这个文件我们只关注 mapChildren 这个函数，因为这个函数内部的实现基本就贯穿了整个文件了
-// 如果你不了解这个 API 干嘛用的，可以阅读文档 https://reactjs.org/docs/react-api.html#reactchildren
+// 当然你想全看了当然也是可以滴，但是我一般来说不会选择全看，毕竟我只想了解代码的核心意图
+// 另外如果你不了解这个 API 干嘛用的，可以阅读文档 https://reactjs.org/docs/react-api.html#reactchildren
 // 接下来我们就直接定位到 mapChildren 函数，开始阅读吧
 
 /**
@@ -112,6 +113,9 @@ function traverseAllChildrenImpl(
   callback,
   traverseContext,
 ) {
+  // 这个函数核心作用就是通过把传入的 children 数组通过遍历摊平成单个节点
+  // 然后去执行 mapSingleChildIntoContext
+
   // 开始判断 children 的类型
   const type = typeof children;
 
@@ -152,12 +156,18 @@ function traverseAllChildrenImpl(
     return 1;
   }
 
+  // nextName 和 nextNamePrefix 都是在处理 key 的命名
   let child;
   let nextName;
   let subtreeCount = 0; // Count of children found in the current subtree.
   const nextNamePrefix =
     nameSoFar === '' ? SEPARATOR : nameSoFar + SUBSEPARATOR;
 
+  // 节点是数组的话，就开始遍历数组，并且把数组中的每个元素再递归执行 traverseAllChildrenImpl
+  // 这一步操作也用来摊平数组的
+  // React.Children.map(this.props.children, c => [[c, c]])
+  // c => [[c, c]] 会被摊平为 [c, c, c, c]
+  // 这里如果看不明白的话过会在 mapSingleChildIntoContext 中肯定能看明白
   if (Array.isArray(children)) {
     for (let i = 0; i < children.length; i++) {
       child = children[i];
@@ -170,7 +180,10 @@ function traverseAllChildrenImpl(
       );
     }
   } else {
+    // 不是数组的话，就看看 children 是否可以支持迭代
+    // 就是通过 obj[Symbol.iterator] 的方式去取
     const iteratorFn = getIteratorFn(children);
+    // 只有取出来对象是个函数类型才是正确的
     if (typeof iteratorFn === 'function') {
       if (__DEV__) {
         // Warn about using Maps as children
@@ -184,7 +197,7 @@ function traverseAllChildrenImpl(
           didWarnAboutMaps = true;
         }
       }
-
+      // 然后就是执行迭代器，重复上面 if 中的逻辑了
       const iterator = iteratorFn.call(children);
       let step;
       let ii = 0;
@@ -299,7 +312,7 @@ function forEachChildren(children, forEachFunc, forEachContext) {
 }
 
 /**
- *
+ * 这个函数只有当传入的 child 是单个节点是才会调用
  * @param bookKeeping 就是我们从对象池子里取出来的东西
  * @param child 传入的节点
  * @param childKey 节点的 key
@@ -312,9 +325,21 @@ function mapSingleChildIntoContext(bookKeeping, child, childKey) {
   // 判断函数返回值是否为数组
   // 因为可能会出现这种情况
   // React.Children.map(this.props.children, c => [c, c])
+  // 对于 c => [c, c] 这种情况来说，每个子元素都会被返回出去两次
+  // 也就是说假如有 2 个子元素 c1 c2，那么通过调用 React.Children.map(this.props.children, c => [c, c]) 后
+  // 返回的应该是 4 个子元素，c1 c1 c2 c2
   if (Array.isArray(mappedChild)) {
+    // 是数组的话就回到最先调用的函数中
+    // 然后回到之前 traverseAllChildrenImpl 摊平数组的问题
+    // 假如 c => [[c, c]]，当执行这个函数时，返回值应该是 [c, c]
+    // 然后 [c, c] 会被当成 children 传入
+    // traverseAllChildrenImpl 内部逻辑判断是数组又会重新递归执行
+    // 所以说即使你的函数是 c => [[[[c, c]]]]
+    // 最后也会被递归摊平到 [c, c, c, c]
     mapIntoWithKeyPrefixInternal(mappedChild, result, childKey, c => c);
   } else if (mappedChild != null) {
+    // 不是数组且返回值不为空，判断返回值是否为有效的 Element
+    // 是的话就把这个元素 clone 一遍并且替换掉 key
     if (isValidElement(mappedChild)) {
       mappedChild = cloneAndReplaceKey(
         mappedChild,
@@ -332,6 +357,7 @@ function mapSingleChildIntoContext(bookKeeping, child, childKey) {
 }
 
 function mapIntoWithKeyPrefixInternal(children, array, prefix, func, context) {
+  // 这里是处理 key，不关心也没事
   let escapedPrefix = '';
   if (prefix != null) {
     escapedPrefix = escapeUserProvidedKey(prefix) + '/';
@@ -367,6 +393,7 @@ function mapChildren(children, func, context) {
   if (children == null) {
     return children;
   }
+  // 遍历出来的元素会丢到 result 中最后返回出去
   const result = [];
   mapIntoWithKeyPrefixInternal(children, result, null, func, context);
   return result;
