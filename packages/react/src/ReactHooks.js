@@ -13,6 +13,7 @@ import warning from 'shared/warning';
 
 import ReactCurrentDispatcher from './ReactCurrentDispatcher';
 
+// 这个文件下的代码基本没啥好说的，都是通过调用 dispatcher 下的属性
 function resolveDispatcher() {
   const dispatcher = ReactCurrentDispatcher.current;
   invariant(
