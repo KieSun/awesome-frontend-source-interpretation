@@ -9,6 +9,8 @@ import warningWithoutStack from 'shared/warningWithoutStack';
 
 const didWarnStateUpdateForUnmountedComponent = {};
 
+// 以下的几个 API 都是用于报警告的，看不看都无所谓
+
 function warnNoop(publicInstance, callerName) {
   if (__DEV__) {
     const constructor = publicInstance.constructor;

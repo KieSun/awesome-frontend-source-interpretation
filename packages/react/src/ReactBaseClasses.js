@@ -36,7 +36,7 @@ function Component(props, context, updater) {
   // We initialize the default updater but the real one gets injected by the
   // renderer.
   // 如果你在组件中打印 this 的话，可能看到过 updater 这个属性
-  // 这里面包含了很多东西，后面再讲
+  // 有兴趣可以去看看 ReactNoopUpdateQueue 中的内容，虽然没几个 API，并且也基本没啥用，都是用来报警告的
   this.updater = updater || ReactNoopUpdateQueue;
 }
 
