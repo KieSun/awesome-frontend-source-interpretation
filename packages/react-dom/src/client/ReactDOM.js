@@ -550,12 +550,15 @@ function legacyRenderSubtreeIntoContainer(
   // TODO: Without `any` type, Flow says "Property cannot be accessed on any
   // member of intersection type." Whyyyyyy.
   let root: Root = (container._reactRootContainer: any);
+  // 没有 root 会执行 if 中的操作
   if (!root) {
     // Initial mount
+    // 创建一个 root 出来
     root = container._reactRootContainer = legacyCreateRootFromDOMContainer(
       container,
       forceHydrate,
     );
+    // 反正我从没传过 callback，不关心实现
     if (typeof callback === 'function') {
       const originalCallback = callback;
       callback = function() {
@@ -564,7 +567,14 @@ function legacyRenderSubtreeIntoContainer(
       };
     }
     // Initial mount should not be batched.
+    // batchedUpdate 是 React 中很重要的一步，也就是批量更新
+    // this.setState({ age: 1 })
+    // this.setState({ age: 2 })
+    // this.setState({ age: 3 })
+    // 以上三次 setState 会被优化成一次更新，减少了渲染次数
+    // 但是对于 Root 来说没必要批量更新，直接调用回调函数
     unbatchedUpdates(() => {
+      // 创建 root 的时候不可能存在 parentComponent，所以也跳过了
       if (parentComponent != null) {
         root.legacy_renderSubtreeIntoContainer(
           parentComponent,
@@ -669,6 +679,8 @@ const ReactDOM: Object = {
     );
   },
 
+  // 想必大家都写过 ReactDOM.render(<APP />, document.getElementById('root')
+  // 那么参数含义就不细讲了，另外第三个参数笔者没有用过，有兴趣了解的可以自行浏览文档
   render(
     element: React$Element<any>,
     container: DOMContainer,
@@ -687,6 +699,8 @@ const ReactDOM: Object = {
         enableStableConcurrentModeAPIs ? 'createRoot' : 'unstable_createRoot',
       );
     }
+    // 注意下 forceHydrate，为 true 时是服务端渲染，这部分内容笔者不会讲到
+    // 调用 render 函数的话这个值永远为 false，调用 hydrate 函数的话这个值会为 true
     return legacyRenderSubtreeIntoContainer(
       null,
       element,

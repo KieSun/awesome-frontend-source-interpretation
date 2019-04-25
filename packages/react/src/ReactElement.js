@@ -175,7 +175,7 @@ const ReactElement = function(type, key, ref, self, source, owner, props) {
  * 根据 type 返回一个新的 ReactElement
  * See https://reactjs.org/docs/react-api.html#createelement
  */
-export function createElement(type, config, children) {
+  export function createElement(type, config, children) {
   let propName;
 
   // Reserved names are extracted
