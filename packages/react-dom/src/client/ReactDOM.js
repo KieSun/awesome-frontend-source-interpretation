@@ -321,11 +321,15 @@ type Work = {
   _didCommit: boolean,
 };
 
+// 以下几个 ReactWork 相关的方法没啥好说的
+// 主体功能就是把回调函数丢入 this._callback 中
+// 然后在需要的时候执行一次 this._callback 中的所有函数
 function ReactWork() {
   this._callbacks = null;
   this._didCommit = false;
   // TODO: Avoid need to bind by replacing callbacks in the update queue with
   // list of Work objects.
+  // 这里固定了一下 this，以防取不到正确的 this
   this._onCommit = this._onCommit.bind(this);
 }
 ReactWork.prototype.then = function(onCommit: () => mixed): void {
@@ -366,6 +370,7 @@ function ReactRoot(
   isConcurrent: boolean,
   hydrate: boolean,
 ) {
+  // 这个 root 指的是 FiberRoot
   const root = createContainer(container, isConcurrent, hydrate);
   this._internalRoot = root;
 }
@@ -373,15 +378,20 @@ ReactRoot.prototype.render = function(
   children: ReactNodeList,
   callback: ?() => mixed,
 ): Work {
+  // 这里指 FiberRoot
   const root = this._internalRoot;
+  // ReactWork 的功能就是为了在组件渲染或更新后把所有传入
+  // ReactDom.render 中的回调函数全部执行一遍
   const work = new ReactWork();
   callback = callback === undefined ? null : callback;
   if (__DEV__) {
     warnOnInvalidCallback(callback, 'render');
   }
+  // 如果有 callback，就 push 进 work 中的数组
   if (callback !== null) {
     work.then(callback);
   }
+  // work._onCommit 就是用于执行所有回调函数的
   updateContainer(children, root, null, work._onCommit);
   return work;
 };
@@ -495,12 +505,16 @@ function legacyCreateRootFromDOMContainer(
   container: DOMContainer,
   forceHydrate: boolean,
 ): Root {
+  // 还是和 SSR 有关，不管这部分
   const shouldHydrate =
     forceHydrate || shouldHydrateDueToLegacyHeuristic(container);
   // First clear any existing content.
   if (!shouldHydrate) {
     let warned = false;
     let rootSibling;
+    // container 内部如果有元素的话，就全部清掉
+    // 但是一般来说我们都是这样写 container 的： <div id='root'></div>
+    // 所以说 container 内部不要写任何的节点，一是会被清掉，二是还要进行 DOM 操作，可能还会涉及到重绘回流等等
     while ((rootSibling = container.lastChild)) {
       if (__DEV__) {
         if (
@@ -532,6 +546,7 @@ function legacyCreateRootFromDOMContainer(
     }
   }
   // Legacy roots are not async by default.
+  // 对于 Root 来说不需要异步
   const isConcurrent = false;
   return new ReactRoot(container, isConcurrent, shouldHydrate);
 }
@@ -549,11 +564,12 @@ function legacyRenderSubtreeIntoContainer(
 
   // TODO: Without `any` type, Flow says "Property cannot be accessed on any
   // member of intersection type." Whyyyyyy.
+  // 一开始进来 container 上是肯定没有这个属性的
   let root: Root = (container._reactRootContainer: any);
   // 没有 root 会执行 if 中的操作
   if (!root) {
     // Initial mount
-    // 创建一个 root 出来
+    // 创建一个 root 出来，类型是 ReactRoot
     root = container._reactRootContainer = legacyCreateRootFromDOMContainer(
       container,
       forceHydrate,
@@ -582,6 +598,7 @@ function legacyRenderSubtreeIntoContainer(
           callback,
         );
       } else {
+        // 调用的是 ReactRoot.prototype.render
         root.render(children, callback);
       }
     });
@@ -699,7 +716,7 @@ const ReactDOM: Object = {
         enableStableConcurrentModeAPIs ? 'createRoot' : 'unstable_createRoot',
       );
     }
-    // 注意下 forceHydrate，为 true 时是服务端渲染，这部分内容笔者不会讲到
+    // 注意下 forceHydrate 参数，为 true 时是服务端渲染，这部分内容笔者不会讲到
     // 调用 render 函数的话这个值永远为 false，调用 hydrate 函数的话这个值会为 true
     return legacyRenderSubtreeIntoContainer(
       null,
