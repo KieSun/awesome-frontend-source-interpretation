@@ -34,17 +34,23 @@ export type PendingInteractionMap = Map<ExpirationTime, Set<Interaction>>;
 
 type BaseFiberRootProperties = {|
   // Any additional information from the host associated with this root.
+  // 容器，也就是 render 的第二个参数
   containerInfo: any,
   // Used only by persistent updates.
+  // 只在持续更新中使用
   pendingChildren: any,
   // The currently active root fiber. This is the mutable root of the tree.
+  // 当前的 fiber 对象
   current: Fiber,
 
   // The following priority levels are used to distinguish between 1)
   // uncommitted work, 2) uncommitted work that is suspended, and 3) uncommitted
   // work that may be unsuspended. We choose not to track each individual
   // pending level, trading granularity for performance.
-  //
+  // 以下几种优先级是用来区分几种情况的
+  // 1 未提交的 work
+  // 2 未提交的 work 是暂停的
+  // 3 未提交的 work 可能是没暂停的
   // The earliest and latest priority levels that are suspended from committing.
   earliestSuspendedTime: ExpirationTime,
   latestSuspendedTime: ExpirationTime,
@@ -75,19 +81,24 @@ type BaseFiberRootProperties = {|
   context: Object | null,
   pendingContext: Object | null,
   // Determines if we should attempt to hydrate on the initial mount
+  // 这个属性说过好几次了
   +hydrate: boolean,
   // Remaining expiration time on this root.
   // TODO: Lift this into the renderer
+  // root 的剩余停止时间
   nextExpirationTimeToWorkOn: ExpirationTime,
+  // 过期时间
   expirationTime: ExpirationTime,
   // List of top-level batches. This list indicates whether a commit should be
   // deferred. Also contains completion callbacks.
   // TODO: Lift this into the renderer
   firstBatch: Batch | null,
   // Linked-list of roots
+  // root 的链表
   nextScheduledRoot: FiberRoot | null,
 
   // New Scheduler fields
+  // 几个新的字段
   callbackNode: *,
   callbackExpirationTime: ExpirationTime,
   firstPendingTime: ExpirationTime,
@@ -116,6 +127,8 @@ export type FiberRoot = {
 };
 
 function FiberRootNode(containerInfo, hydrate) {
+  // 以下每个属性的意义可以查看 BaseFiberRootProperties
+  // 在那里我把属性都注释了一遍中文
   this.current = null;
   this.containerInfo = containerInfo;
   this.pendingChildren = null;
@@ -158,6 +171,7 @@ export function createFiberRoot(
   isConcurrent: boolean,
   hydrate: boolean,
 ): FiberRoot {
+  // FiberRootNode 内部创建了很多属性
   const root: FiberRoot = (new FiberRootNode(containerInfo, hydrate): any);
 
   // Cyclic construction. This cheats the type system right now because
