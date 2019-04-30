@@ -591,6 +591,7 @@ function legacyRenderSubtreeIntoContainer(
     // 但是对于 Root 来说没必要批量更新，直接调用回调函数
     unbatchedUpdates(() => {
       // 创建 root 的时候不可能存在 parentComponent，所以也跳过了
+      // 其实也不是没可能存在 parentComponent，如果在 root 上使用 context 就可以了
       if (parentComponent != null) {
         root.legacy_renderSubtreeIntoContainer(
           parentComponent,
