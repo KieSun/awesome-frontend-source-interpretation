@@ -177,7 +177,13 @@ export function createFiberRoot(
   // Cyclic construction. This cheats the type system right now because
   // stateNode is any.
   // 创建一个 root fiber，这也是 React 16 中的核心架构了
-  // fiber 其实也会组成一个树结构，内部使用了单链表树结构，每个节点都会对应一个 fiber
+  // fiber 其实也会组成一个树结构，内部使用了单链表树结构，每个节点及组件都会对应一个 fiber
+  // FiberRoot 和 Root Fiber 会互相引用
+  // 这两个对象的内部属性可以自行查阅，反正有详细的注释表面重要的属性的含义
+  // 另外如果你有 React 写的项目的话，可以通过以下代码找到 Fiber Root，它对应着容器
+  // document.querySelector('#root')._reactRootContainer._internalRoot
+  // 另外 fiber tree 的结构可以看我画的这个图
+  // https://user-gold-cdn.xitu.io/2019/5/2/16a7672bc5152431?w=1372&h=2024&f=png&s=316240
   const uninitializedFiber = createHostRootFiber(isConcurrent);
   root.current = uninitializedFiber;
   uninitializedFiber.stateNode = root;
