@@ -130,6 +130,7 @@ export type Fiber = {|
   // This is effectively the parent, but there can be multiple parents (two)
   // so this is only the parent of the thing we're currently processing.
   // It is conceptually the same as the return address of a stack frame.
+  // 以上三个属性用来构建 fiber tree
   return: Fiber | null,
 
   // Singly Linked List Tree Structure.
@@ -146,6 +147,7 @@ export type Fiber = {|
   memoizedProps: any, // The props used to create the output.
 
   // A queue of state updates and callbacks.
+  // 用来存放 update，也就是用来记录改变状态的
   updateQueue: UpdateQueue<any> | null,
 
   // The state used to create the output
@@ -163,6 +165,8 @@ export type Fiber = {|
   mode: TypeOfMode,
 
   // Effect
+  // 这个属性很有意思，用来打标记的，用于告知这个节点上要做些什么 DOM 操作
+  // 你可以在后续的代码中看到很多关于 tag 的位运算
   effectTag: SideEffectTag,
 
   // Singly linked list fast path to the next fiber with side-effects.
@@ -184,6 +188,13 @@ export type Fiber = {|
   // This is a pooled version of a Fiber. Every fiber that gets updated will
   // eventually have a pair. There are cases when we can clean up pairs to save
   // memory if we need to.
+  // 一般来说我们应用中会有 2 个 fiber tree
+  // 一个是 old tree，一个是 workInProgress tree
+  // 前者是已经渲染好的 DOM 树对应的 fiber tree
+  // 后者是正在执行更新中的 fiber tree，还能便于中断后恢复
+  // 两颗树还是相互引用的，便于共享内部的一些属性
+  // 当更新结束以后，workInProgress tree 会变成 old tree
+  // 这样的做法称之为 double buffering
   alternate: Fiber | null,
 
   // Time spent rendering this Fiber and its descendants for the current update.
