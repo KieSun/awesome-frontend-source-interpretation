@@ -40,7 +40,7 @@ type BaseFiberRootProperties = {|
   // 只在持续更新中使用
   pendingChildren: any,
   // The currently active root fiber. This is the mutable root of the tree.
-  // 当前的 fiber 对象
+  // 当前的 fiber 对象，也就是 root fiber
   current: Fiber,
 
   // The following priority levels are used to distinguish between 1)
@@ -125,7 +125,6 @@ export type FiberRoot = {
   ...BaseFiberRootProperties,
   ...ProfilingOnlyFiberRootProperties,
 };
-
 function FiberRootNode(containerInfo, hydrate) {
   // 以下每个属性的意义可以查看 BaseFiberRootProperties
   // 在那里我把一些属性都注释了一遍中文

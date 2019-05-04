@@ -134,7 +134,7 @@ function scheduleRootUpdate(
       );
     }
   }
-
+  // 创建一个 update，就是内部有几个属性的对象
   const update = createUpdate(expirationTime);
   // Caution: React DevTools currently depends on this property
   // being called "element".
@@ -152,6 +152,7 @@ function scheduleRootUpdate(
   }
 
   flushPassiveEffects();
+  // 把 update 入队，内部就是一些创建或者获取 queue（链表结构），然后给链表添加一个节点的操作
   enqueueUpdate(current, update);
   scheduleWork(current, expirationTime);
 
@@ -166,6 +167,7 @@ export function updateContainerAtExpirationTime(
   callback: ?Function,
 ) {
   // TODO: If this is a nested container, this won't be the root.
+  // 和之前一样
   const current = container.current;
 
   if (__DEV__) {
@@ -179,7 +181,7 @@ export function updateContainerAtExpirationTime(
       }
     }
   }
-
+  // 获取 context 并赋值，这里肯定取不到值得，因为 parentComponent 为 null
   const context = getContextForSubtree(parentComponent);
   if (container.context === null) {
     container.context = context;
@@ -285,7 +287,9 @@ export function updateContainer(
   parentComponent: ?React$Component<any, any>,
   callback: ?Function,
 ): ExpirationTime {
+  // 取出容器的 fiber 对象，也就是 fiber root
   const current = container.current;
+  // 计算时间
   const currentTime = requestCurrentTime();
   const expirationTime = computeExpirationForFiber(currentTime, current);
   return updateContainerAtExpirationTime(
