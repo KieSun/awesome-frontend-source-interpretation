@@ -17,6 +17,7 @@ if (__DEV__) {
 ## 文章列表
 
 - [热身篇](https://github.com/KieSun/Dream/issues/18)
+- [render 流程（一）](https://github.com/KieSun/Dream/issues/19)
 
 ## 我的公众号
 
