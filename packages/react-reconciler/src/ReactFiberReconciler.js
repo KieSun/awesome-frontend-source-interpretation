@@ -291,6 +291,8 @@ export function updateContainer(
   const current = container.current;
   // 计算时间
   const currentTime = requestCurrentTime();
+  // expirationTime 代表优先级，数字越大优先级越高
+  // sync 的数字是最大的，所以优先级也是最高的
   const expirationTime = computeExpirationForFiber(currentTime, current);
   return updateContainerAtExpirationTime(
     element,
