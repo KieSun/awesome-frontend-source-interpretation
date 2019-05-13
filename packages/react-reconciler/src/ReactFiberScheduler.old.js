@@ -1779,6 +1779,7 @@ function resolveRetryThenable(boundaryFiber: Fiber, thenable: Thenable) {
 }
 
 function scheduleWorkToRoot(fiber: Fiber, expirationTime): FiberRoot | null {
+  // 用于记录调度器的状态
   recordScheduleUpdate();
 
   if (__DEV__) {
@@ -1789,6 +1790,8 @@ function scheduleWorkToRoot(fiber: Fiber, expirationTime): FiberRoot | null {
   }
 
   // Update the source fiber's expiration time
+  // expirationTime 越大说明优先级越高
+  // 以下两个 if 判断是在把 fiber 的优先级设置的更高
   if (fiber.expirationTime < expirationTime) {
     fiber.expirationTime = expirationTime;
   }
@@ -1797,13 +1800,18 @@ function scheduleWorkToRoot(fiber: Fiber, expirationTime): FiberRoot | null {
     alternate.expirationTime = expirationTime;
   }
   // Walk the parent path to the root and update the child expiration time.
+  // 获取 fiber 的父节点，Root Fiber 是没有 return 属性的
   let node = fiber.return;
   let root = null;
+  // 判断这时候 fiber 是否为 Root Fiber
   if (node === null && fiber.tag === HostRoot) {
+    // 取出 Fiber Root
     root = fiber.stateNode;
   } else {
     while (node !== null) {
       alternate = node.alternate;
+      // 下面的判断都是在将低优先级设置为高的优先级
+      // 最后判断是否获得了 Root Fiber
       if (node.childExpirationTime < expirationTime) {
         node.childExpirationTime = expirationTime;
         if (
@@ -1826,6 +1834,9 @@ function scheduleWorkToRoot(fiber: Fiber, expirationTime): FiberRoot | null {
     }
   }
 
+  // 这部分内容是 React Profiler 相关的，DevTool 相关的内容
+  // 可以方便找出你的 React 应用的性能瓶颈
+  // 这部分内容不在此介绍
   if (enableSchedulerTracing) {
     if (root !== null) {
       const interactions = __interactionsRef.current;
@@ -1896,7 +1907,8 @@ export function warnIfNotCurrentlyActingUpdatesInDev(fiber: Fiber): void {
   }
 }
 
-function scheduleWork(fiber: Fiber, expirationTime: ExpirationTime) {
+function scheduleWork (fiber: Fiber, expirationTime: ExpirationTime) {
+  // 获取 fiber root
   const root = scheduleWorkToRoot(fiber, expirationTime);
   if (root === null) {
     if (__DEV__) {
@@ -1914,13 +1926,17 @@ function scheduleWork(fiber: Fiber, expirationTime: ExpirationTime) {
     }
     return;
   }
-
+  // 这个分支表示高优先级任务打断低优先级任务
+  // 这种情况发生于以下场景：有一个优先级较低的任务（必然是异步任务）没有执行完，
+  // 执行权交给了浏览器，然后再交还给 JS 的时候有一个新的高优先级任务进来了
+  // 这时候需要去执行高优先级任务，所以需要打断低优先级任务
   if (
     !isWorking &&
     nextRenderExpirationTime !== NoWork &&
     expirationTime > nextRenderExpirationTime
   ) {
     // This is an interruption. (Used for performance tracking.)
+    // 记录被谁打断的
     interruptedBy = fiber;
     resetStack();
   }
