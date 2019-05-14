@@ -384,8 +384,16 @@ if (__DEV__ && replayFailedUnitOfWorkWithInvokeGuardedCallback) {
 }
 
 function resetStack() {
+  // nextUnitOfWork：下一个需要执行的 fiber 节点
   if (nextUnitOfWork !== null) {
+    // 往上找 fiber 节点
     let interruptedWork = nextUnitOfWork.return;
+    // 如果存在父节点的话，就清掉父节点的 valueStack
+    // valueStack 因为之前代码里没见过，所以去网上查了点资料
+    // 发现这个数组应该是用来存储数据的
+    // 这个做法应该是为了重头开始一个新的任务。因为打断一个任务的时候
+    // 被打断的任务可能已经改变一部分节点的数据，这时候新的任务开始时
+    // 不应该被之前的任务所影响，需要清掉之前任务的影响。
     while (interruptedWork !== null) {
       unwindInterruptedWork(interruptedWork);
       interruptedWork = interruptedWork.return;
@@ -396,7 +404,7 @@ function resetStack() {
     ReactStrictModeWarnings.discardPendingWarnings();
     checkThatStackIsEmpty();
   }
-
+  // 重置变量
   nextRoot = null;
   nextRenderExpirationTime = NoWork;
   nextLatestAbsoluteTimeoutMs = -1;
