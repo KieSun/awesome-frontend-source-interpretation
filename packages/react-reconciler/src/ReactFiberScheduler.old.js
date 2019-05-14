@@ -1946,6 +1946,7 @@ function scheduleWork (fiber: Fiber, expirationTime: ExpirationTime) {
     // This is an interruption. (Used for performance tracking.)
     // 记录被谁打断的
     interruptedBy = fiber;
+    // 重置 stack，具体来说应该是 valueStack
     resetStack();
   }
   markPendingPriorityLevel(root, expirationTime);
@@ -2220,6 +2221,7 @@ function requestWork(root: FiberRoot, expirationTime: ExpirationTime) {
   }
 
   // TODO: Get rid of Sync and use current time?
+  // 判断优先级是同步还是异步，异步的话需要调度
   if (expirationTime === Sync) {
     performSyncWork();
   } else {
@@ -2230,8 +2232,10 @@ function requestWork(root: FiberRoot, expirationTime: ExpirationTime) {
 function addRootToSchedule(root: FiberRoot, expirationTime: ExpirationTime) {
   // Add the root to the schedule.
   // Check if this root is already part of the schedule.
+  // 判断 root 是否调度过
   if (root.nextScheduledRoot === null) {
     // This root is not already scheduled. Add it.
+    // root 没有调度过
     root.expirationTime = expirationTime;
     if (lastScheduledRoot === null) {
       firstScheduledRoot = lastScheduledRoot = root;
@@ -2243,6 +2247,7 @@ function addRootToSchedule(root: FiberRoot, expirationTime: ExpirationTime) {
     }
   } else {
     // This root is already scheduled, but its priority may have increased.
+    // root 已经调度过，判断是否需要更新优先级
     const remainingExpirationTime = root.expirationTime;
     if (expirationTime > remainingExpirationTime) {
       // Update the priority.
