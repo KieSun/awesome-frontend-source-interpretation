@@ -1961,6 +1961,8 @@ function scheduleWork (fiber: Fiber, expirationTime: ExpirationTime) {
     const rootExpirationTime = root.expirationTime;
     requestWork(root, rootExpirationTime);
   }
+  // 在某些生命周期函数中 setState 会造成无限循环
+  // 这里是告知你的代码触发无限循环了
   if (nestedUpdateCount > NESTED_UPDATE_LIMIT) {
     // Reset this back to zero so subsequent updates don't throw.
     nestedUpdateCount = 0;
@@ -2070,12 +2072,15 @@ function scheduleCallbackWithExpirationTime(
   root: FiberRoot,
   expirationTime: ExpirationTime,
 ) {
+  // 判断上一个 callback 是否执行完毕
   if (callbackExpirationTime !== NoWork) {
     // A callback is already scheduled. Check its expiration time (timeout).
+    // 当前任务如果优先级小于上个任务就退出
     if (expirationTime < callbackExpirationTime) {
       // Existing callback has sufficient timeout. Exit.
       return;
     } else {
+      // 否则的话就取消上个 callback
       if (callbackID !== null) {
         // Existing callback has insufficient timeout. Cancel and schedule a
         // new one.
@@ -2084,6 +2089,7 @@ function scheduleCallbackWithExpirationTime(
     }
     // The request callback timer is already running. Don't start a new one.
   } else {
+    // 没有需要执行的上一个 callback，开始定时器，这个函数用于 devtool
     startRequestCallbackTimer();
   }
 
@@ -2201,15 +2207,23 @@ function requestCurrentTime() {
 // requestWork is called by the scheduler whenever a root receives an update.
 // It's up to the renderer to call renderRoot at some point in the future.
 function requestWork(root: FiberRoot, expirationTime: ExpirationTime) {
+  // 将 root 加入调度中
   addRootToSchedule(root, expirationTime);
   if (isRendering) {
     // Prevent reentrancy. Remaining work will be scheduled at the end of
     // the currently rendering batch.
     return;
   }
-
+  // 判断是否需要批量更新
+  // 当我们触发事件回调时，其实回调会被 batchedUpdates 函数封装一次
+  // 这个函数会把 isBatchingUpdates 设为 true，也就是说我们在事件回调函数内部
+  // 调用 setState 不会马上触发 state 的更新及渲染，只是单纯创建了一个 updater，然后在这个分支 return 了
+  // 只有当整个事件回调函数执行完毕后恢复 isBatchingUpdates 的值，并且执行 performSyncWork
+  // 想必很多人知道在类似 setTimeout 中使用 setState 以后 state 会马上更新，如果你想在定时器回调中也实现批量更新，
+  // 就可以使用 batchedUpdates 将你需要的代码封装一下
   if (isBatchingUpdates) {
     // Flush work at the end of the batch.
+    // 判断是否不需要批量更新
     if (isUnbatchingUpdates) {
       // ...unless we're inside unbatchedUpdates, in which case we should
       // flush it now.
@@ -2225,6 +2239,11 @@ function requestWork(root: FiberRoot, expirationTime: ExpirationTime) {
   if (expirationTime === Sync) {
     performSyncWork();
   } else {
+    // 函数核心是实现了 requestIdleCallback 的 polyfill 版本
+    // 因为这个函数浏览器的兼容性很差
+    // 具体作用可以查看 MDN 文档 https://developer.mozilla.org/zh-CN/docs/Web/API/Window/requestIdleCallback
+    // 这个函数可以让浏览器空闲时期依次调用函数，这就可以让开发者在主事件循环中执行后台或低优先级的任务，
+    // 而且不会对像动画和用户交互这样延迟敏感的事件产生影响
     scheduleCallbackWithExpirationTime(root, expirationTime);
   }
 }
