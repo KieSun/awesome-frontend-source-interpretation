@@ -305,7 +305,9 @@ function unstable_scheduleCallback(
 ) {
   var startTime =
     currentEventStartTime !== -1 ? currentEventStartTime : getCurrentTime();
-
+  // 这里其实只会进第一个 if 条件，因为外部写死了一定会传 deprecated_options.timeout
+  // 接下来的 expirationTime 和之前的逻辑就反过来了
+  // 变成越小优先级越高了
   var expirationTime;
   if (
     typeof deprecated_options === 'object' &&
@@ -315,6 +317,8 @@ function unstable_scheduleCallback(
     // FIXME: Remove this branch once we lift expiration times out of React.
     expirationTime = startTime + deprecated_options.timeout;
   } else {
+    // 其实我觉得这部分代码好理解多了，通过优先级来定过期时间，不用去算那个 timeout
+    // 说实话计算那个时间真的看得我头疼。。
     switch (priorityLevel) {
       case ImmediatePriority:
         expirationTime = startTime + IMMEDIATE_PRIORITY_TIMEOUT;

@@ -51,13 +51,13 @@ function computeExpirationBucket(
   // 689637 - 623296 = 66341
   // currentTime = 1073741823 - ((66341 / 10) | 0) = 1073735189
   // 假如是 computeAsyncExpiration 调用并传入 currentTime 为 1073735189
-  // 1073741823 - (((1073741822 - 1073735189 + 500) | 0) + 1) *  25 = 1073563473
+  // 1073741822 - (((1073741822 - 1073735189 + 500) | 0) + 1) *  25 = 1073563472
   // 假如是 computeInteractiveExpiration 调用并传入 currentTime 为 1073735189
-  // 1073741823 - (((1073741822 - 1073735189 + 15) | 0) + 1) *  10 = 1073675333
+  // 1073741822 - (((1073741822 - 1073735189 + 15) | 0) + 1) *  10 = 1073675332
   // 明显算出来后者大于前者，也就是优先级更高
   // 另外 | 0 + 1 * bucketSizeMs / UNIT_SIZE 是为了抹平距离 25 或者 10 以内的时间差
   // 假如两个 currentTime 分别为 1073735189 和 1073735199，他们有 10 的时间差
-  // 虽然时间不一样，但是通过 computeInteractiveExpiration 函数算出来的时间都为 1073675333
+  // 虽然时间不一样，但是通过 computeInteractiveExpiration 函数算出来的时间都为 1073675332
   return (
     MAGIC_NUMBER_OFFSET -
     ceiling(

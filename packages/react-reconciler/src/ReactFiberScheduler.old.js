@@ -2094,9 +2094,13 @@ function scheduleCallbackWithExpirationTime(
   }
 
   callbackExpirationTime = expirationTime;
+  // 当前 performance.now() 和程序刚执行时的 performance.now() 相减
   const currentMs = now() - originalStartTimeMs;
   const expirationTimeMs = expirationTimeToMs(expirationTime);
+  // 毫秒相减，优先级越大，算出来的值越小，可以自己模拟一下
+  // 这个值在后面会和 performance.now() 相加再算出一个 expirationTime
   const timeout = expirationTimeMs - currentMs;
+  // 获取优先级，这个优先级有五个，但是这个优先级其实在 scheduleCallback 函数中压根没用到
   const priorityLevel = getCurrentPriorityLevel();
   callbackID = scheduleCallback(priorityLevel, performAsyncWork, {timeout});
 }
