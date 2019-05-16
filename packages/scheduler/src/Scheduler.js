@@ -337,7 +337,7 @@ function unstable_scheduleCallback(
         expirationTime = startTime + NORMAL_PRIORITY_TIMEOUT;
     }
   }
-
+  // 环形双向链表结构，下面就是考验大家数据结构功底的时候了
   var newNode = {
     callback,
     priorityLevel: priorityLevel,
@@ -349,6 +349,11 @@ function unstable_scheduleCallback(
   // Insert the new callback into the list, ordered first by expiration, then
   // by insertion. So the new callback is inserted any other callback with
   // equal expiration.
+  // 看不懂代码的话，就自己谷歌一下环形双向链表是怎么实现的，这里我就不解析实现了了
+  // 核心思路就是 firstCallbackNode 优先级最高 lastCallbackNode 优先级最低
+  // 新生成一个 newNode 以后，就从头开始比较优先级
+  // 如果新的高，就把新的往前插入，否则就往后插，直到没有一个 node 的优先级比他低
+  // 那么新的节点就变成 lastCallbackNode
   if (firstCallbackNode === null) {
     // This is the first callback in the list.
     firstCallbackNode = newNode.next = newNode.previous = newNode;
