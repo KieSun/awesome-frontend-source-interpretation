@@ -54,6 +54,7 @@ var isPerformingWork = false;
 var isHostCallbackScheduled = false;
 
 function scheduleHostCallbackIfNeeded() {
+  // 如果已经调用 flushWork 的话
   if (isPerformingWork) {
     // Don't schedule work yet; wait until the next time we yield.
     return;
@@ -307,7 +308,7 @@ function unstable_scheduleCallback(
     currentEventStartTime !== -1 ? currentEventStartTime : getCurrentTime();
   // 这里其实只会进第一个 if 条件，因为外部写死了一定会传 deprecated_options.timeout
   // 接下来的 expirationTime 和之前的逻辑就反过来了
-  // 变成越小优先级越高了
+  // 变成越小优先级越高了，同时也代表一个任务的过期时间
   var expirationTime;
   if (
     typeof deprecated_options === 'object' &&
@@ -354,6 +355,7 @@ function unstable_scheduleCallback(
   // 新生成一个 newNode 以后，就从头开始比较优先级
   // 如果新的高，就把新的往前插入，否则就往后插，直到没有一个 node 的优先级比他低
   // 那么新的节点就变成 lastCallbackNode
+  // 除了改变 lastCallbackNode 的情况，其他情况都需要重新调度，因为调度必须从 firstCallbackNode 开始
   if (firstCallbackNode === null) {
     // This is the first callback in the list.
     firstCallbackNode = newNode.next = newNode.previous = newNode;
