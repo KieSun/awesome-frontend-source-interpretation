@@ -18,6 +18,7 @@ if (__DEV__) {
 
 - [热身篇](https://github.com/KieSun/Dream/issues/18)
 - [render 流程（一）](https://github.com/KieSun/Dream/issues/19)
+- [render 流程（二）](https://github.com/KieSun/Dream/issues/20)
 
 ![](https://user-gold-cdn.xitu.io/2019/5/21/16ad8f1f2da96d78?w=737&h=291&f=png&s=61868)
 
