@@ -10,7 +10,7 @@ PS：不会对任何 DEV 环境下的代码做解读，类似以下代码：
 
 ```js
 if (__DEV__) {
-  // ...
+	// ...
 }
 ```
 
@@ -20,10 +20,10 @@ if (__DEV__) {
 - [render 流程（一）](https://github.com/KieSun/Dream/issues/19)
 - [render 流程（二）](https://github.com/KieSun/Dream/issues/20)
 
-![](https://user-gold-cdn.xitu.io/2019/5/21/16ad8f1f2da96d78?w=737&h=291&f=png&s=61868)
+![](https://yck-1254263422.cos.ap-shanghai.myqcloud.com/blog/2019-06-01-034225.png)
 
 ## 我的公众号
 
 觉得内容有帮助可以关注下我的公众号 「前端真好玩」咯，会有很多好东西等着你。
 
-![](https://user-gold-cdn.xitu.io/2018/12/7/1678800c654a7f34?w=258&h=258&f=jpeg&s=26756)
+![](https://yck-1254263422.cos.ap-shanghai.myqcloud.com/blog/2019-06-01-034228.jpg)
