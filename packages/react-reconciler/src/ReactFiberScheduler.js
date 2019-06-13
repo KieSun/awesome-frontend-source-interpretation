@@ -65,6 +65,7 @@ import {
   inferStartTimeFromExpirationTime as inferStartTimeFromExpirationTime_new,
 } from './ReactFiberScheduler.new';
 
+// enableNewScheduler 都为 false，所以我们只看 old 的代码
 export const requestCurrentTime = enableNewScheduler
   ? requestCurrentTime_new
   : requestCurrentTime_old;

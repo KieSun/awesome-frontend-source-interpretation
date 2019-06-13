@@ -200,7 +200,7 @@ export function createUpdate(expirationTime: ExpirationTime): Update<*> {
     // setState 的第一二个参数
     payload: null,
     callback: null,
-    // 用于在链表中找到下一个节点
+    // 用于在队列中找到下一个节点
     next: null,
     nextEffect: null,
   };

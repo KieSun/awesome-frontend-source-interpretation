@@ -77,20 +77,24 @@ function flushFirstCallback() {
 
   // Remove the node from the list before calling the callback. That way the
   // list is in a consistent state even if the callback throws.
+  // 链表操作
   var next = firstCallbackNode.next;
   if (firstCallbackNode === next) {
     // This is the last callback in the list.
+    // 当前链表中只有一个节点
     firstCallbackNode = null;
     next = null;
   } else {
+    // 有多个节点，重新赋值 firstCallbackNode，用于之前函数中下一次的 while 判断
     var lastCallbackNode = firstCallbackNode.previous;
     firstCallbackNode = lastCallbackNode.next = next;
     next.previous = lastCallbackNode;
   }
-
+  // 清空指针
   currentlyFlushingCallback.next = currentlyFlushingCallback.previous = null;
 
   // Now it's safe to call the callback.
+  // 这个 callback 是 performAsyncWork 函数
   var callback = currentlyFlushingCallback.callback;
   var expirationTime = currentlyFlushingCallback.expirationTime;
   var priorityLevel = currentlyFlushingCallback.priorityLevel;
@@ -114,6 +118,9 @@ function flushFirstCallback() {
 
   // A callback may return a continuation. The continuation should be scheduled
   // with the same priority and expiration as the just-finished callback.
+  // performAsyncWork 并不会返回任何值，所以这个条件也进不去
+  // 但是代码我们还是看看的，核心其实和之前设置链表节点一样
+  // 生成一个新节点，判断两个节点的优先级
   if (typeof continuationCallback === 'function') {
     var continuationNode: CallbackNode = {
       callback: continuationCallback,
@@ -168,12 +175,14 @@ function flushWork(didUserCallbackTimeout) {
   }
 
   // We'll need a new host callback the next time work is scheduled.
+  // 一些变量的设置
   isHostCallbackScheduled = false;
 
   isPerformingWork = true;
   const previousDidTimeout = currentHostCallbackDidTimeout;
   currentHostCallbackDidTimeout = didUserCallbackTimeout;
   try {
+    // 判断是否超时
     if (didUserCallbackTimeout) {
       // Flush all the expired callbacks without yielding.
       while (
@@ -184,6 +193,8 @@ function flushWork(didUserCallbackTimeout) {
         // Read the current time. Flush all the callbacks that expire at or
         // earlier than that time. Then read the current time again and repeat.
         // This optimizes for as few performance.now calls as possible.
+        // 超时的话，获取当前时间，判断任务是否过期，过期的话就执行任务
+        // 并且判断下一个任务是否也已经过期
         var currentTime = getCurrentTime();
         if (firstCallbackNode.expirationTime <= currentTime) {
           do {
@@ -199,12 +210,14 @@ function flushWork(didUserCallbackTimeout) {
       }
     } else {
       // Keep flushing callbacks until we run out of time in the frame.
+      // 没有超时说明还有时间可以执行任务，执行任务完成后继续判断
       if (firstCallbackNode !== null) {
         do {
           if (enableSchedulerDebugging && isSchedulerPaused) {
             break;
           }
           flushFirstCallback();
+        // !shouldYieldToHost 就是判断 frameDeadline > getCurrentTime()，也就是判断当前帧是否还有时间
         } while (firstCallbackNode !== null && !shouldYieldToHost());
       }
     }

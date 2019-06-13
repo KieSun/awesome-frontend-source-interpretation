@@ -2345,6 +2345,7 @@ function findHighestPriorityRoot() {
 }
 
 function performAsyncWork(didTimeout) {
+  // 判断任务是否过期
   if (didTimeout) {
     // The callback timed out. That means at least one update has expired.
     // Iterate through the root schedule. If they contain expired work, set
@@ -2364,15 +2365,18 @@ function performAsyncWork(didTimeout) {
 
   // Keep working on roots until there's no more work, or until there's a higher
   // priority event.
+  // 找到优先级最高的节点
   findHighestPriorityRoot();
-
+  // 判断是否可以打断
   if (disableYielding) {
     // Just do it all
+    // 不可以打断，把任务执行到底
     while (nextFlushedRoot !== null && nextFlushedExpirationTime !== NoWork) {
       performWorkOnRoot(nextFlushedRoot, nextFlushedExpirationTime, false);
       findHighestPriorityRoot();
     }
   } else {
+    // 可以打断
     recomputeCurrentRendererTime();
     currentSchedulerTime = currentRendererTime;
 
@@ -2381,7 +2385,7 @@ function performAsyncWork(didTimeout) {
       const timeout = expirationTimeToMs(nextFlushedExpirationTime);
       stopRequestCallbackTimer(didExpire, timeout);
     }
-
+    // 判断当前不需要打断且当前帧还有时间
     while (
       nextFlushedRoot !== null &&
       nextFlushedExpirationTime !== NoWork &&
@@ -2424,6 +2428,8 @@ function performSyncWork() {
 function performWork(minExpirationTime: ExpirationTime) {
   // Keep working on roots until there's no more work, or until there's a higher
   // priority event.
+  // 这个函数内部逻辑和 performAsyncWork 差不多
+  // 反正最后都是调用 performWorkOnRoot 函数
   findHighestPriorityRoot();
 
   while (
@@ -2515,11 +2521,12 @@ function performWorkOnRoot(
 
   // Check if this is async work or sync/expired work.
   if (!isYieldy) {
+    // 不可打断任务
     // Flush work without yielding.
     // TODO: Non-yieldy work does not necessarily imply expired work. A renderer
     // may want to perform some work without yielding, but also without
     // requiring the root to complete (by triggering placeholders).
-
+    // 判断是否存在已完成的 finishedWork，存在话就完成它
     let finishedWork = root.finishedWork;
     if (finishedWork !== null) {
       // This root is already complete. We can commit it.
@@ -2534,6 +2541,7 @@ function performWorkOnRoot(
         // $FlowFixMe Complains noTimeout is not a TimeoutID, despite the check above
         cancelTimeout(timeoutHandle);
       }
+      // 否则就去渲染成 DOM
       renderRoot(root, isYieldy);
       finishedWork = root.finishedWork;
       if (finishedWork !== null) {
@@ -2542,6 +2550,7 @@ function performWorkOnRoot(
       }
     }
   } else {
+    // 可打断任务
     // Flush async work.
     let finishedWork = root.finishedWork;
     if (finishedWork !== null) {
