@@ -1172,6 +1172,7 @@ function completeUnitOfWork(workInProgress: Fiber): Fiber | null {
   return null;
 }
 
+// 开始组件更新
 function performUnitOfWork(workInProgress: Fiber): Fiber | null {
   // The current, flushed, state of this fiber is the alternate.
   // Ideally nothing should rely on this, but relying on it here
@@ -1206,6 +1207,7 @@ function performUnitOfWork(workInProgress: Fiber): Fiber | null {
       stopProfilerTimerIfRunningAndRecordDelta(workInProgress, true);
     }
   } else {
+    // 开始工作
     next = beginWork(current, workInProgress, nextRenderExpirationTime);
     workInProgress.memoizedProps = workInProgress.pendingProps;
   }
@@ -1235,6 +1237,7 @@ function performUnitOfWork(workInProgress: Fiber): Fiber | null {
 }
 
 function workLoop(isYieldy) {
+  // 对 nextUnitOfWork 循环进行判断，直到没有 nextUnitOfWork
   if (!isYieldy) {
     // Flush work without yielding
     while (nextUnitOfWork !== null) {
@@ -1248,6 +1251,8 @@ function workLoop(isYieldy) {
   }
 }
 
+// 开始渲染整颗树，这个函数在异步模式下可能会被多次执行，因为在异步模式下
+// 可以打断任务。打断也就意味着每次都得回到 root 再开始从上往下循环
 function renderRoot(root: FiberRoot, isYieldy: boolean): void {
   invariant(
     !isWorking,
@@ -1274,6 +1279,7 @@ function renderRoot(root: FiberRoot, isYieldy: boolean): void {
     resetStack();
     nextRoot = root;
     nextRenderExpirationTime = expirationTime;
+    // 获取下一个需要工作的单元
     nextUnitOfWork = createWorkInProgress(
       nextRoot.current,
       null,
