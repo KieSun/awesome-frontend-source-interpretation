@@ -2066,16 +2066,18 @@ function beginWork(
   if (current !== null) {
     const oldProps = current.memoizedProps;
     const newProps = workInProgress.pendingProps;
-
+    // 判断 props 和 context 是否改变
     if (oldProps !== newProps || hasLegacyContextChanged()) {
       // If props or context changed, mark the fiber as having performed work.
       // This may be unset if the props are determined to be equal later (memo).
       didReceiveUpdate = true;
+    //  判断当前 fiber 的优先级是否小于本次渲染的优先级，小于的话可以跳过
     } else if (updateExpirationTime < renderExpirationTime) {
       didReceiveUpdate = false;
       // This fiber does not have any pending work. Bailout without entering
       // the begin phase. There's still some bookkeeping we that needs to be done
       // in this optimized path, mostly pushing stuff onto the stack.
+      // 根据节点进行优化
       switch (workInProgress.tag) {
         case HostRoot:
           pushHostRootContext(workInProgress);
@@ -2169,6 +2171,8 @@ function beginWork(
           break;
         }
       }
+      // 判断该节点下的子节点优先级是否大于 renderExpirationTime
+      // 如果也是小于的话，就可以直接把整个子树跳过循环
       return bailoutOnAlreadyFinishedWork(
         current,
         workInProgress,
@@ -2186,7 +2190,7 @@ function beginWork(
     case IndeterminateComponent: {
       const elementType = workInProgress.elementType;
       return mountIndeterminateComponent(
-        current,
+        current, 
         workInProgress,
         elementType,
         renderExpirationTime,

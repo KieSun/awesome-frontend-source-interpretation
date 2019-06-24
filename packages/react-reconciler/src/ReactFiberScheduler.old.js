@@ -1178,6 +1178,8 @@ function performUnitOfWork(workInProgress: Fiber): Fiber | null {
   // Ideally nothing should rely on this, but relying on it here
   // means that we don't need an additional field on the work in
   // progress.
+  // 获得 fiber 的替身，调和这一阶段都是在替身上完成的
+  // 然后直接看 beginWork
   const current = workInProgress.alternate;
 
   // See if beginning this work spawns more work.
@@ -1198,7 +1200,6 @@ function performUnitOfWork(workInProgress: Fiber): Fiber | null {
     if (workInProgress.mode & ProfileMode) {
       startProfilerTimer(workInProgress);
     }
-
     next = beginWork(current, workInProgress, nextRenderExpirationTime);
     workInProgress.memoizedProps = workInProgress.pendingProps;
 
@@ -1240,6 +1241,8 @@ function workLoop(isYieldy) {
   // 对 nextUnitOfWork 循环进行判断，直到没有 nextUnitOfWork
   if (!isYieldy) {
     // Flush work without yielding
+    // 一开始进来 nextUnitOfWork 是 root，每次执行 performUnitOfWork 后
+    // 都会生成下一个工作单元
     while (nextUnitOfWork !== null) {
       nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
     }
@@ -1345,6 +1348,7 @@ function renderRoot(root: FiberRoot, isYieldy: boolean): void {
 
   do {
     try {
+      // 循环更新节点
       workLoop(isYieldy);
     } catch (thrownValue) {
       resetContextDependences();
