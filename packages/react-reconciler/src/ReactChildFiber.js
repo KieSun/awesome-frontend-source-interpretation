@@ -248,7 +248,11 @@ function ChildReconciler(shouldTrackSideEffects) {
     // deletions, so we can just append the deletion to the list. The remaining
     // effects aren't added until the complete phase. Once we implement
     // resuming, this may not be true.
+    // 找到父组件中需要更新的最后一个子组件
     const last = returnFiber.lastEffect;
+    // 判断链表是否存在
+    // 这个链表的目的就是把该父节点上的所有需要更新的子节点通过链表链接起来
+    // 然后下次真正需要更新的时候只需要遍历链表即可
     if (last !== null) {
       last.nextEffect = childToDelete;
       returnFiber.lastEffect = childToDelete;
@@ -1123,6 +1127,7 @@ function ChildReconciler(shouldTrackSideEffects) {
             ? element.type === REACT_FRAGMENT_TYPE
             : child.elementType === element.type
         ) {
+          // key 相同且 type 相同，进行复用，不相同呢就开始删
           deleteRemainingChildren(returnFiber, child.sibling);
           const existing = useFiber(
             child,
@@ -1147,7 +1152,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       }
       child = child.sibling;
     }
-
+    // 不相同的情况下去创建新的 fiber node
     if (element.type === REACT_FRAGMENT_TYPE) {
       const created = createFiberFromFragment(
         element.props.children,
@@ -1230,19 +1235,23 @@ function ChildReconciler(shouldTrackSideEffects) {
     // Handle top level unkeyed fragments as if they were arrays.
     // This leads to an ambiguity between <>{[...]}</> and <>...</>.
     // We treat the ambiguous cases above the same.
+    // 判断是否为 fragment，是的话取 fragment 的 children
     const isUnkeyedTopLevelFragment =
       typeof newChild === 'object' &&
       newChild !== null &&
       newChild.type === REACT_FRAGMENT_TYPE &&
       newChild.key === null;
+    //  是的话，就取 fragment 的 children
     if (isUnkeyedTopLevelFragment) {
       newChild = newChild.props.children;
     }
 
     // Handle object types
+    // 接下来开始判断返回值的类型
     const isObject = typeof newChild === 'object' && newChild !== null;
 
     if (isObject) {
+      // 判断下类型，反正都是单个节点的类型，
       switch (newChild.$$typeof) {
         case REACT_ELEMENT_TYPE:
           return placeSingleChild(
@@ -1266,6 +1275,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
 
     if (typeof newChild === 'string' || typeof newChild === 'number') {
+      // 判断之前是否也是 text Node，是的话就可以复用，只需要替换文本即可
       return placeSingleChild(
         reconcileSingleTextNode(
           returnFiber,
@@ -1275,7 +1285,7 @@ function ChildReconciler(shouldTrackSideEffects) {
         ),
       );
     }
-
+    // 处理子节点是数组的情况
     if (isArray(newChild)) {
       return reconcileChildrenArray(
         returnFiber,
@@ -1303,6 +1313,7 @@ function ChildReconciler(shouldTrackSideEffects) {
         warnOnFunctionType();
       }
     }
+    // 错误处理
     if (typeof newChild === 'undefined' && !isUnkeyedTopLevelFragment) {
       // If the new child is undefined, and the return fiber is a composite
       // component, throw an error. If Fiber return types are disabled,
@@ -1334,6 +1345,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
 
     // Remaining cases are all treated as empty.
+    // 进这里说明返回值为 null，删除所有的 children
     return deleteRemainingChildren(returnFiber, currentFirstChild);
   }
 

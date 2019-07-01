@@ -178,6 +178,7 @@ export function reconcileChildren(
   renderExpirationTime: ExpirationTime,
 ) {
   if (current === null) {
+    // 第一次渲染组件
     // If this is a fresh new component that hasn't been rendered yet, we
     // won't update its child set by applying minimal side-effects. Instead,
     // we will add them all to the child before it gets rendered. That means
@@ -189,6 +190,7 @@ export function reconcileChildren(
       renderExpirationTime,
     );
   } else {
+    // 更新组件
     // If the current child is the same as the work in progress, it means that
     // we haven't yet started any work on these children. Therefore, we use
     // the clone algorithm to create a copy of all the current children.
@@ -614,6 +616,8 @@ function updateFunctionComponent(
     }
     setCurrentPhase(null);
   } else {
+    // 返回值就是这个 let children = Component(props, refOrContext)
+    // 我们可以发现函数组件第二个参数可以接收 context 对象
     nextChildren = renderWithHooks(
       current,
       workInProgress,
@@ -2190,7 +2194,7 @@ function beginWork(
     case IndeterminateComponent: {
       const elementType = workInProgress.elementType;
       return mountIndeterminateComponent(
-        current, 
+        current,
         workInProgress,
         elementType,
         renderExpirationTime,
