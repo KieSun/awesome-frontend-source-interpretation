@@ -326,6 +326,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       // Noop.
       return lastPlacedIndex;
     }
+    // 更新组件才执行下面逻辑
     const current = newFiber.alternate;
     if (current !== null) {
       const oldIndex = current.index;
@@ -770,24 +771,30 @@ function ChildReconciler(shouldTrackSideEffects) {
 
     let resultingFirstChild: Fiber | null = null;
     let previousNewFiber: Fiber | null = null;
-
+    // 原父节点的第一个子节点
     let oldFiber = currentFirstChild;
     let lastPlacedIndex = 0;
     let newIdx = 0;
     let nextOldFiber = null;
+    // 第一轮遍历条件：存在原先的子节点且未遍历完需要更新的子节点
     for (; oldFiber !== null && newIdx < newChildren.length; newIdx++) {
+      // 第一个条件没看懂，想不到什么情况下会老的 fiber 的 index > newIdx
+      //  正常来说 nextOldFiber 就是下一个节点了
       if (oldFiber.index > newIdx) {
         nextOldFiber = oldFiber;
         oldFiber = null;
       } else {
         nextOldFiber = oldFiber.sibling;
       }
+      // 如果 key 相同的话就可以复用 fiber。另外 oldFiber 如果为空的话，就会重新创建一个 fiber
+      // 这个情况对应上面我看不懂的条件
       const newFiber = updateSlot(
         returnFiber,
         oldFiber,
         newChildren[newIdx],
         expirationTime,
       );
+      // 如果不能复用 fiber 话，就跳出循环
       if (newFiber === null) {
         // TODO: This breaks on empty slots like null children. That's
         // unfortunate because it triggers the slow path all the time. We need
@@ -798,6 +805,10 @@ function ChildReconciler(shouldTrackSideEffects) {
         }
         break;
       }
+      // 接下来都是可以复用 fiber 的逻辑
+      // shouldTrackSideEffects 代表更新组件
+      // 如果需要追踪副作用并且是重新创建了一个 fiber 的情况
+      // 那么会把 oldFiber 删掉
       if (shouldTrackSideEffects) {
         if (oldFiber && newFiber.alternate === null) {
           // We matched the slot, but we didn't reuse the existing fiber, so we
@@ -975,12 +986,14 @@ function ChildReconciler(shouldTrackSideEffects) {
       } else {
         nextOldFiber = oldFiber.sibling;
       }
+      // 只有当 key 相同时复用 fiber
       const newFiber = updateSlot(
         returnFiber,
         oldFiber,
         step.value,
         expirationTime,
       );
+      // 不能复用 fiber 就结束第一轮遍历
       if (newFiber === null) {
         // TODO: This breaks on empty slots like null children. That's
         // unfortunate because it triggers the slow path all the time. We need
