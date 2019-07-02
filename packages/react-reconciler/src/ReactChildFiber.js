@@ -328,6 +328,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
     // 更新组件才执行下面逻辑
     const current = newFiber.alternate;
+    // 比较两个 index 的值，并打上 tag，这个 tag 代表插入或者移动节点。
     if (current !== null) {
       const oldIndex = current.index;
       if (oldIndex < lastPlacedIndex) {
@@ -818,6 +819,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       }
       lastPlacedIndex = placeChild(newFiber, lastPlacedIndex, newIdx);
       if (previousNewFiber === null) {
+        // 第一次渲染赋值
         // TODO: Move out of the loop. This only happens for the first run.
         resultingFirstChild = newFiber;
       } else {
@@ -825,22 +827,25 @@ function ChildReconciler(shouldTrackSideEffects) {
         // I.e. if we had null values before, then we want to defer this
         // for each null value. However, we also don't want to call updateSlot
         // with the previous one.
+        // 链表连接新的 fiber 节点
         previousNewFiber.sibling = newFiber;
       }
       previousNewFiber = newFiber;
       oldFiber = nextOldFiber;
     }
-
+    // 新的子节点已经遍历完毕，那就看看是否还需要把老的剩余子节点删掉
     if (newIdx === newChildren.length) {
       // We've reached the end of the new children. We can delete the rest.
       deleteRemainingChildren(returnFiber, oldFiber);
       return resultingFirstChild;
     }
-
+    // 老的子节点遍历完毕
     if (oldFiber === null) {
       // If we don't have any more existing children we can choose a fast path
       // since the rest will all be insertions.
+      // 遍历剩余的新子节点
       for (; newIdx < newChildren.length; newIdx++) {
+        // 不能复用了，所以只能创建
         const newFiber = createChild(
           returnFiber,
           newChildren[newIdx],
@@ -849,6 +854,7 @@ function ChildReconciler(shouldTrackSideEffects) {
         if (!newFiber) {
           continue;
         }
+        // 下面的逻辑和之前一样
         lastPlacedIndex = placeChild(newFiber, lastPlacedIndex, newIdx);
         if (previousNewFiber === null) {
           // TODO: Move out of the loop. This only happens for the first run.
@@ -862,10 +868,13 @@ function ChildReconciler(shouldTrackSideEffects) {
     }
 
     // Add all children to a key map for quick lookups.
+    // 这里指新老的子节点都没有遍历完，那就把老的子节点的 key 或者 index 生成一个 Map
     const existingChildren = mapRemainingChildren(returnFiber, oldFiber);
 
     // Keep scanning and use the map to restore deleted items as moves.
+    // 继续遍历新的子节点
     for (; newIdx < newChildren.length; newIdx++) {
+      // 从 Map 中找出可以复用的 fiber 节点，不能复用就重新创建新的
       const newFiber = updateFromMap(
         existingChildren,
         returnFiber,
@@ -873,6 +882,7 @@ function ChildReconciler(shouldTrackSideEffects) {
         newChildren[newIdx],
         expirationTime,
       );
+      // 以下逻辑和之前的一样
       if (newFiber) {
         if (shouldTrackSideEffects) {
           if (newFiber.alternate !== null) {
@@ -880,6 +890,7 @@ function ChildReconciler(shouldTrackSideEffects) {
             // current, that means that we reused the fiber. We need to delete
             // it from the child list so that we don't add it to the deletion
             // list.
+            // 如果复用 fiber，就把原先的 fiber 删了
             existingChildren.delete(
               newFiber.key === null ? newIdx : newFiber.key,
             );
@@ -894,7 +905,7 @@ function ChildReconciler(shouldTrackSideEffects) {
         previousNewFiber = newFiber;
       }
     }
-
+    // 把不能复用的子节点都删了
     if (shouldTrackSideEffects) {
       // Any existing children that weren't consumed above were deleted. We need
       // to add them to the deletion list.
