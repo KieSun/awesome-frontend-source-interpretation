@@ -494,9 +494,12 @@ function checkClassInstance(workInProgress: Fiber, ctor: any, newProps: any) {
 }
 
 function adoptClassInstance(workInProgress: Fiber, instance: any): void {
+  // setState = this.updater.enqueueSetState
   instance.updater = classComponentUpdater;
   workInProgress.stateNode = instance;
   // The instance needs access to the fiber so that it can schedule updates
+  // 用于获取 fiber
+  // instance._reactInternalFiber = workInProgress
   setInstance(instance, workInProgress);
   if (__DEV__) {
     instance._reactInternalInstance = fakeInternalInstance;
@@ -802,8 +805,10 @@ function mountClassInstance(
     }
   }
 
+  // 获取 updateQueue，和 setState 相关
   let updateQueue = workInProgress.updateQueue;
   if (updateQueue !== null) {
+    // 执行所有的 setState 获取当前的 state
     processUpdateQueue(
       workInProgress,
       updateQueue,
@@ -813,7 +818,7 @@ function mountClassInstance(
     );
     instance.state = workInProgress.memoizedState;
   }
-
+  // 接下来就是判断是否存在生命周期函数并执行了
   const getDerivedStateFromProps = ctor.getDerivedStateFromProps;
   if (typeof getDerivedStateFromProps === 'function') {
     applyDerivedStateFromProps(
@@ -836,6 +841,8 @@ function mountClassInstance(
     callComponentWillMount(workInProgress, instance);
     // If we had additional state updates during this life-cycle, let's
     // process them now.
+    // 在 WillMount 执行后会判断是否 setState 了
+    // 如果有的话，会立即获取最新的 state
     updateQueue = workInProgress.updateQueue;
     if (updateQueue !== null) {
       processUpdateQueue(
@@ -1023,7 +1030,7 @@ function updateClassInstance(
     const nextUnmaskedContext = getUnmaskedContext(workInProgress, ctor, true);
     nextContext = getMaskedContext(workInProgress, nextUnmaskedContext);
   }
-
+  // 前面的没啥好看的
   const getDerivedStateFromProps = ctor.getDerivedStateFromProps;
   const hasNewLifecycles =
     typeof getDerivedStateFromProps === 'function' ||
@@ -1065,7 +1072,8 @@ function updateClassInstance(
     );
     newState = workInProgress.memoizedState;
   }
-
+  // 判断是否不需要更新，如果不需要渲染，但是 state 或者 props 和之前的数据不同
+  // 还是会调用 componentDidUpdate 及 getSnapshotBeforeUpdate
   if (
     oldProps === newProps &&
     oldState === newState &&
@@ -1102,7 +1110,7 @@ function updateClassInstance(
     );
     newState = workInProgress.memoizedState;
   }
-
+  // 执行 shouldComponentUpdate
   const shouldUpdate =
     checkHasForceUpdateAfterProcessing() ||
     checkShouldComponentUpdate(
@@ -1114,7 +1122,7 @@ function updateClassInstance(
       newState,
       nextContext,
     );
-
+  // 生命周期函数的调用
   if (shouldUpdate) {
     // In order to support react-lifecycles-compat polyfilled components,
     // Unsafe lifecycles should not be invoked for components using the new APIs.

@@ -432,7 +432,7 @@ export function processUpdateQueue<State>(
   renderExpirationTime: ExpirationTime,
 ): void {
   hasForceUpdate = false;
-
+  // 获取的 queue 是在 WorkInProgress 上被拷贝的那份
   queue = ensureWorkInProgressQueueIsAClone(workInProgress, queue);
 
   if (__DEV__) {
@@ -447,8 +447,10 @@ export function processUpdateQueue<State>(
   // Iterate through the list of updates to compute the result.
   let update = queue.firstUpdate;
   let resultState = newBaseState;
+  // 遍历链表
   while (update !== null) {
     const updateExpirationTime = update.expirationTime;
+    // 判断优先级，是否需要跳过这个更新
     if (updateExpirationTime < renderExpirationTime) {
       // This update does not have sufficient priority. Skip it.
       if (newFirstUpdate === null) {
@@ -467,6 +469,7 @@ export function processUpdateQueue<State>(
     } else {
       // This update does have sufficient priority. Process it and compute
       // a new result.
+      // 获取 state
       resultState = getStateFromUpdate(
         workInProgress,
         queue,
@@ -475,6 +478,7 @@ export function processUpdateQueue<State>(
         props,
         instance,
       );
+      // 处理 callback
       const callback = update.callback;
       if (callback !== null) {
         workInProgress.effectTag |= Callback;
@@ -493,6 +497,7 @@ export function processUpdateQueue<State>(
   }
 
   // Separately, iterate though the list of captured updates.
+  // CapturedUpdate 不需要去关注
   let newFirstCapturedUpdate = null;
   update = queue.firstCapturedUpdate;
   while (update !== null) {

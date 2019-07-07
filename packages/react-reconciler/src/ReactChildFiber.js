@@ -896,7 +896,7 @@ function ChildReconciler(shouldTrackSideEffects) {
             );
           }
         }
-        lastPlacedIndex = placeChild(newFiber, lastPlacedIndex, newIdx);
+        lastPlacedIndex = placeChild(newFiber, lastPlacedIndex, newIdx); // 2
         if (previousNewFiber === null) {
           resultingFirstChild = newFiber;
         } else {

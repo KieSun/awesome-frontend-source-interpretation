@@ -698,12 +698,14 @@ function updateClassComponent(
       workInProgress.effectTag |= Placement;
     }
     // In the initial pass we might need to construct the instance.
+    // 执行构造函数
     constructClassInstance(
       workInProgress,
       Component,
       nextProps,
       renderExpirationTime,
     );
+    // 挂载
     mountClassInstance(
       workInProgress,
       Component,
@@ -720,6 +722,7 @@ function updateClassComponent(
       renderExpirationTime,
     );
   } else {
+    // 更新组件
     shouldUpdate = updateClassInstance(
       current,
       workInProgress,
@@ -760,6 +763,7 @@ function finishClassComponent(
   renderExpirationTime: ExpirationTime,
 ) {
   // Refs should update even if shouldComponentUpdate returns false
+  // 更新 ref，即使不需要更新组件
   markRef(current, workInProgress);
 
   const didCaptureError = (workInProgress.effectTag & DidCapture) !== NoEffect;
@@ -815,6 +819,7 @@ function finishClassComponent(
 
   // React DevTools reads this flag.
   workInProgress.effectTag |= PerformedWork;
+  // 开始 diff 算法，生成新的 children
   if (current !== null && didCaptureError) {
     // If we're recovering from an error, reconcile without reusing any of
     // the existing children. Conceptually, the normal children and the children
@@ -843,7 +848,7 @@ function finishClassComponent(
   if (hasContext) {
     invalidateContextProvider(workInProgress, Component, true);
   }
-
+  // 最后把新的第一个 child 返回出去作为下一个工作节点
   return workInProgress.child;
 }
 
