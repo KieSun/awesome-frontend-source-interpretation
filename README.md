@@ -22,8 +22,9 @@ if (__DEV__) {
 
 ![](https://yck-1254263422.cos.ap-shanghai.myqcloud.com/blog/2019-06-01-034225.png)
 
-## 我的公众号
+## 一起学习
 
-觉得内容有帮助可以关注下我的公众号 「前端真好玩」咯，会有很多好东西等着你。
+觉得内容有帮助可以关注下我的公众号 「前端真好玩」或者加入 React 源码交流群。
 
-![](https://yck-1254263422.cos.ap-shanghai.myqcloud.com/blog/2019-06-01-034228.jpg)
+![](https://yck-1254263422.cos.ap-shanghai.myqcloud.com/blog/2019-06-01-034138.jpg)
+![](https://yck-1254263422.cos.ap-shanghai.myqcloud.com/blog/2019-06-01-034140.png)
