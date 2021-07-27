@@ -13,6 +13,7 @@
 ### 读源码前的准备及注意事项
 
 - [不要读源码](./article/不要读源码.md)
+- [如何调试 react 源码](./article/如何调试%20react%20源码.md)
 ### 架构层面
 
 ### 组件 mount 及 update
