@@ -2,7 +2,7 @@
 
 <p align='center'>
 <img src="https://img.shields.io/badge/Total%20Reading-1.6M-success">
-<img src="https://img.shields.io/badge/Total%20Word%20Count-1691-success">
+<img src="https://img.shields.io/badge/Total%20Word%20Count-15328-success">
 <img src="https://visitor-badge.laobi.icu/badge?page_id=KieSun.awesome-frontend-source-interpretation" alt="visitor badge"/>  
 </p>
 
