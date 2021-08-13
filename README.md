@@ -30,13 +30,6 @@
 | VueRouter | 久远   | [源码解析](./article/vue/VueRouter%20源码深度解析.md)            |
 | Vuex | 久远   | [源码解析](./article/vue/Vuex%20源码深度解析.md)            |
 
-
-# 🐳 Go
-
-| Project | Version | Article |
-|:-------:|:-------:|:------|
-|Go|1.16 darwin/amd64| [Go 初学者的成长之路](https://github.com/halfrost/Halfrost-Field/blob/master/contents/Go/new_gopher_tips.md)<br>|
-
 ## 个人信息
 
 | 微信扫码关注公众号，订阅更多精彩内容                                                                 | 加笔者微信进群与大厂大佬讨论技术                                                                    |
